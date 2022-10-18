@@ -50,13 +50,14 @@ if __name__ == '__main__':
     
     #initialize the dictionnary of comments_information
     dict_of_comment = dict()
-    ##initialize a dict first
-    dict_of_comment['author'] = []
-    dict_of_comment['comment'] = []
-    dict_of_comment['reply'] = []
-    dict_of_comment['date_time'] = []
-    dict_of_comment['nbr_likes'] = []
-         
+
+    dict_of_comment['comment'] = {'text':[],
+                                  'nbr_likes':[],
+                                  'author': [],
+                                  'reply':{'id_rep':[],
+                                           'text':[],
+                                           }
+                                  }
  
     #get first 10 items from 20 comments 
     items = response["items"][:min(len(response["items"]),MAX_NBR_COM)]
@@ -71,7 +72,7 @@ if __name__ == '__main__':
         
         comment_info_rep = dict()
         comment_info_rep['textDisplay'] = ''
-        
+        comment_info_rep['parentId'] = ''
         if "replies" in item.keys():
             item_info_rep = item["replies"]############
             comment_rep = item_info_rep["comments"]
@@ -83,13 +84,19 @@ if __name__ == '__main__':
         
         
         #the top level comment can have sub reply comments
+        
+        dict_of_comment['comment']['text'].append(comment_info['textDisplay'])
+        dict_of_comment['comment']['nbr_likes'].append(comment_info['likeCount'])
+        dict_of_comment['comment']['author'].append(comment_info['authorDisplayName'])
+        
+        #reply
+        dict_of_comment['comment']['reply']['id_rep'].append(comment_info_rep['parentId'])
+        dict_of_comment['comment']['reply']['text'].append(comment_info_rep['textDisplay'])
+
+
 
         
-        dict_of_comment['author'].append(comment_info['authorDisplayName'])
-        dict_of_comment['comment'].append(comment_info['textDisplay'])
-        dict_of_comment['reply'].append(comment_info_rep['textDisplay'])############
-        dict_of_comment['date_time'].append(comment_info["likeCount"])
-        dict_of_comment['nbr_likes'].append(comment_info['publishedAt'])
+        
     
                      
     
