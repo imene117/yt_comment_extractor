@@ -8,182 +8,99 @@ Created on Thu Oct 13 09:36:07 2022
 import pandas as pd
 import yaml
 from googleapiclient.discovery import build
+import json
 
-'''
+        
+
 
 def build_res_req(api_key,video_id,MAX_NBR_COM):
-    #build a resource for youtube
-    resource = build('youtube', 'v3', developerKey=api_key)
-    #create a request to get 20 comments on the video
-    request = resource.commentThreads().list(
-                                part="snippet,replies",
-                                videoId=video_id,
-                                maxResults= MAX_NBR_COM,   #get 20 comments
-                                order="orderUnspecified")  #top comments.
-    #execute the request
-    response =request.execute()
-    return response
+        #build a resource for youtube
+        resource = build('youtube', 'v3', developerKey=api_key)
+        #create a request to get 20 comments on the video
+        request = resource.commentThreads().list(
+                                    part="snippet,replies",
+                                    videoId=video_id,
+                                    maxResults= MAX_NBR_COM,   #get 20 comments
+                                    order="orderUnspecified")  #top comments.
+        #execute the request
+        response =request.execute()
+        return response
 
-
-
-def extract_info_comment(item):
-    item_info = item["snippet"]
     
-    #the top level comment can have sub reply comments
-    topLevelComment = item_info["topLevelComment"]
-    comment_info = topLevelComment["snippet"]
-    df_line = pd.DataFrame({'author':comment_info["authorDisplayName"],
-                            'comment':comment_info["textDisplay"],
-                            'date_time':comment_info["likeCount"],
-                            'nbr_likes':comment_info['publishedAt']},index=[0])
-    return df_line
- 
-   
- 
+# function extracting the object items, and returning a dictionnary dict_of_comment
+def dict_comment_item(response,MAX_NBR_COM):
+    #initialize the dictionnary of comments_information
+    dict_of_comment = dict()
 
-def df_comments(MAX_NBR_COM,response):
+    dict_of_comment['comment'] = {'text':[],
+                                  'nbr_likes':[],
+                                  'author': [],
+                                  'totalReplyCount':[],
+                                  'reply':{'id_rep':[],
+                                           'text':[]
+                                           }
+                                  }
+ 
     #get first 10 items from 20 comments 
     items = response["items"][:min(len(response["items"]),MAX_NBR_COM)]
-     
-    #Data frame containing author, comment, ...
-    channel_data = pd.DataFrame(columns=['author','comment','replies','date_time','nbr_likes'])
-    ####
     
     for item in items:
-        #the top level comment can have sub reply comments
-        item_info = item["snippet"]
+        #getting the comments from snippet
+        item_info = item["snippet"]  
         topLevelComment = item_info["topLevelComment"]
         comment_info = topLevelComment["snippet"]
         
-        df_line = extract_info_comment(item)
+        #getting the replies
+        comment_info_rep = dict()
+        comment_info_rep['textDisplay'] = ''
+        comment_info_rep['parentId'] = ''
         
-        channel_data = df_append(channel_data,df_line)
+        nbr_of_replies = item_info["totalReplyCount"]#########
+        rep =[]
+        #In case we have a replies
+        #n = nbr_of_replies
         
-    return channel_data
+        if "replies" in item.keys():
+            n = len(item["replies"]['comments'])
+            for rc in range(0,n,1):
+                item_info_rep = item["replies"]
+                #comment_rep = item_info_rep["comments"]
+                var_pb = item_info_rep["comments"][rc]['snippet']['textDisplay']
+                rep.append(var_pb)
         
-        
-        
-        
-
-def df_append(df,df_line):
-    df = pd.concat([df, df_line], ignore_index=True, sort=False)
-    return df
-
-
- 
-
-
-def read_params(param_file):
-    with open(param_file,'r') as f:
-        params = yaml.safe_load(f)
-    return params
-
-def make_json():
-    pass
-
-'''      
-        
-        
-
-def build_res_req(api_key,video_id,MAX_NBR_COM):
-    #build a resource for youtube
-    resource = build('youtube', 'v3', developerKey=api_key)
-    #create a request to get 20 comments on the video
-    request = resource.commentThreads().list(
-                                part="snippet,replies",
-                                videoId=video_id,
-                                maxResults= MAX_NBR_COM,   #get 20 comments
-                                order="orderUnspecified")  #top comments.
-    #execute the request
-    response =request.execute()
-    return response
-
-
-##df
-def extract_info_comment(item):
-    item_info = item["snippet"]
-    #item_info_rep = item["replies"]
-    
-    #the top level comment can have sub reply comments
-    topLevelComment = item_info["topLevelComment"]
-    comment_info = topLevelComment["snippet"]
-    
-    
-    #comment_rep = item_info_rep["comments"]
-    #comment_info_rep = comment_rep["snippet"]
-    df_line = pd.DataFrame({'author':comment_info['authorDisplayName'],
-                            'comment':comment_info['textDisplay'],
-                            #'reply': comment_info_rep['textDisplay'],
-                            'date_time':comment_info["likeCount"],
-                            'nbr_likes':comment_info['publishedAt']},index=[0])
-    return df_line
- 
-   
- 
-##df
-def df_comments(MAX_NBR_COM,response):
-    #get first 10 items from 20 comments 
-    items = response["items"][:min(len(response["items"]),MAX_NBR_COM)]
-     
-    #Data frame containing author, comment, ...
-    channel_data = pd.DataFrame(columns=['author','comment','reply','date_time','nbr_likes'])
-    ####
-    
-    for item in items:
         #the top level comment can have sub reply comments
-        item_info = item["snippet"]
-        item_info_rep = item["replies"]
-        
-        #####333333333333333333333333333
-        #topLevelComment = item_info["topLevelComment"]
-        #comment_info = topLevelComment["snippet"]
-        
-        #comment_rep = item_info_rep["comments"]
-        #comment_info_rep = comment_rep["snippet"]
-        #####333333333333333333333333333
+        dict_of_comment['comment']['text'].append(comment_info['textDisplay'])
+        dict_of_comment['comment']['nbr_likes'].append(comment_info['likeCount'])
+        dict_of_comment['comment']['author'].append(comment_info['authorDisplayName'])
+        dict_of_comment['comment']['totalReplyCount'].append(nbr_of_replies)
+
+        #reply
+        dict_of_comment['comment']['reply']['id_rep'].append(comment_info_rep['parentId'])
+        dict_of_comment['comment']['reply']['text'].append(rep)
 
 
-        df_line = extract_info_comment(item)
-        
-        channel_data = df_append(channel_data,df_line)
-        
-    return channel_data
+    return dict_of_comment
+
+def comments_to_json(list_of_videoLinks,response,MAX_NBR_COM):
+    dict_multi_videoComments = dict()
+    n = len(list_of_videoLinks)
+    for l in range(0,n,1):
+        dict_multi_videoComments[list_of_videoLinks[l]] =  dict_comment_item(response,MAX_NBR_COM)
     
-##initialize a dict first
-dict_of_comment = dict()
-dict_of_comment['author'] = []
-dict_of_comment['comment'] = []
-dict_of_comment['reply'] = []
-dict_of_comment['date_time'] = []
-dict_of_comment['nbr_likes'] = []
-
-
-##dict
-def dict_comments(MAX_NBR_COM,response):
-    #get first 10 items from 20 comments 
-    items = response["items"][:min(len(response["items"]),MAX_NBR_COM)]
+    #json file to check the structur of comments vs replies B
+    fDump = open('file.json', 'w')
+    json.dump(response, fDump)
+    fDump.close()
+        
+    return dict_multi_videoComments
 
     
-
-        
-        
-        
-##df
-def df_append(df,df_line):
-    df = pd.concat([df, df_line], ignore_index=True, sort=False)
-    return df
-
-
+    
  
-
-
 def read_params(param_file):
     with open(param_file,'r') as f:
         params = yaml.safe_load(f)
     return params
-
-def make_json():
-    pass
 
 
 

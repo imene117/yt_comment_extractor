@@ -5,119 +5,28 @@ Created on Thu Oct 13 09:31:47 2022
 
 @author: hocine
 """
-
 import fct_utile as fu
-from googleapiclient.discovery import build
-
 
 #1- initialize param_file parameter
-param_file = "params.yaml"
+param_file = 'params.yaml'
+
 #2- read  param_file parameter
 params = fu.read_params(param_file)
 
 #3- mow all parameteres are in params
-MAX_NBR_COM = params["MAX_NBR_COM"]
+MAX_NBR_COM = params['MAX_NBR_COM']
+api_key = params["api_key"]
+video_id = params["video_id"]
+list_of_videoLinks = params['list_of_videoLinks']
+
 
 if __name__ == '__main__':
     
-    api_key = params["api_key"]
-    video_id = params["video_id"]
-    '''
-    response = fu.build_res_req(api_key,video_id,MAX_NBR_COM)    
-   
-    comment = fu.df_comments(MAX_NBR_COM,response)
-    '''
     
-    
-    
-    
-    
-    
-    def build_res_req(api_key,video_id,MAX_NBR_COM):
-        #build a resource for youtube
-        resource = build('youtube', 'v3', developerKey=api_key)
-        #create a request to get 20 comments on the video
-        request = resource.commentThreads().list(
-                                    part="snippet,replies",
-                                    videoId=video_id,
-                                    maxResults= MAX_NBR_COM,   #get 20 comments
-                                    order="orderUnspecified")  #top comments.
-        #execute the request
-        response =request.execute()
-        return response
-    
-    response = build_res_req(api_key,video_id,MAX_NBR_COM)    
-    
-    #initialize the dictionnary of comments_information
-    dict_of_comment = dict()
 
-    dict_of_comment['comment'] = {'text':[],
-                                  'nbr_likes':[],
-                                  'author': [],
-                                  'reply':{'id_rep':[],
-                                           'text':[],
-                                           }
-                                  }
- 
-    #get first 10 items from 20 comments 
-    items = response["items"][:min(len(response["items"]),MAX_NBR_COM)]
+    response = fu.build_res_req(api_key,video_id,MAX_NBR_COM)  
     
-    
-    for item in items:
-        #the top level comment can have sub reply comments
-        item_info = item["snippet"]  
-        topLevelComment = item_info["topLevelComment"]
-        comment_info = topLevelComment["snippet"]
-        
-        
-        comment_info_rep = dict()
-        comment_info_rep['textDisplay'] = ''
-        comment_info_rep['parentId'] = ''
-        if "replies" in item.keys():
-            item_info_rep = item["replies"]############
-            comment_rep = item_info_rep["comments"]
+    dict_of_comment = fu.dict_comment_item(response,MAX_NBR_COM)
             
-            for x in comment_rep:
-                if 'snippet' in x.keys():
-                    comment_info_rep = x['snippet']
-                    break
+    dict_multi_videoComments = fu.comments_to_json(list_of_videoLinks,response,MAX_NBR_COM)
         
-        
-        #the top level comment can have sub reply comments
-        
-        dict_of_comment['comment']['text'].append(comment_info['textDisplay'])
-        dict_of_comment['comment']['nbr_likes'].append(comment_info['likeCount'])
-        dict_of_comment['comment']['author'].append(comment_info['authorDisplayName'])
-        
-        #reply
-        dict_of_comment['comment']['reply']['id_rep'].append(comment_info_rep['parentId'])
-        dict_of_comment['comment']['reply']['text'].append(comment_info_rep['textDisplay'])
-
-
-
-        
-        
-    
-                     
-    
- 
-    
- 
-    
- 
-    
- 
-    
- 
-    
- 
-    
- 
-    
- 
-    
- 
-    
- 
-    
- 
