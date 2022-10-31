@@ -85,6 +85,7 @@ def comments_to_json(list_of_videoLinks,response,MAX_NBR_COM):
     dict_multi_videoComments = dict()
     n = len(list_of_videoLinks)
     for l in range(0,n,1):
+        print('processing ', list_of_videoLinks[l], '...')
         dict_multi_videoComments[list_of_videoLinks[l]] =  dict_comment_item(response,MAX_NBR_COM)
     
     #json file to check the structur of comments vs replies B
