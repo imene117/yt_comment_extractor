@@ -1,0 +1,15 @@
+#To Build Docker Image 
+    docker build -t YOUR_PROJECT_NAME:VERSION_OF_YOUR_PROJECT .
+    
+    
+#To List Docker Images in YOUR computer
+    docker image ls
+#To Remove Docker Image from YOUR computer
+    docker image rm -f  PROJECT_NAME:VERSION (OR IMAGE ID)
+    
+#To Run Docker CONTAINER (Container is an IMAGE in execution)
+    docker run PROJECT_NAME:VERSION (OR IMAGE ID)
+    
+    
+#
+    docker run --mount type=bind,source=C:/Users/Nedjmeddine/yt_comment_extractor/params.yaml,target=/app/params.yaml d3a6ff464040
