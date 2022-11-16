@@ -25,21 +25,6 @@ def build_res_req(api_key,video_id,MAX_NBR_COM):
         response =request.execute()
         return response
 
-'''
-def build_video_req(api_key,video_id,MAX_NBR_COM):
-    # Get credentials and create an API client
-    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
-    credentials = flow.run_console()
-    youtube = googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
-
-    request = youtube.videos().list(
-        part="snippet",
-        id="XTjtPc0uiG8"
-        )
-    response = request.execute()
-    return response
-'''    
-
 
 def comments_to_json(list_of_videoLinks,MAX_NBR_COM,api_key):
     dict_multi_videoComments = dict()
@@ -52,8 +37,7 @@ def comments_to_json(list_of_videoLinks,MAX_NBR_COM,api_key):
     json.dump(res, fDump)
     fDump.close()
         
-    return dict_multi_videoComments  
-    
+    return dict_multi_videoComments   
  
     
  
@@ -63,7 +47,6 @@ def read_params(param_file):
     return params
   
 
-#####New dict
 # function extracting the object items, and returning a dictionnary dict_of_comment
 def dict_comment_item(response,MAX_NBR_COM,video_id):
     #initialize the dictionnary of comments_information
@@ -145,8 +128,7 @@ def dict_comment_item(response,MAX_NBR_COM,video_id):
     return dict_of_comment
 
 
-#fct to that return a dict to a df
-
+#fct that return a dict to a df
 def dict_to_df(key_list,dict_multi_videoComments,dict_of_dfs):
 
     for vi in key_list:
@@ -200,21 +182,5 @@ def dict_to_df(key_list,dict_multi_videoComments,dict_of_dfs):
     
     
     
-
-
-
-
-
-
-'''
-lenght_comm_df = len(dict_multi_videoComments[i]['author_comm'])# nbr of comment
-lenght_rep_df = len(dict_multi_videoComments[i]['reply']['author_rep'])# nbr of replies
-print('ceci est length rep df:',lenght_rep_df)
-'''
-
-
-
-
-
 
 
