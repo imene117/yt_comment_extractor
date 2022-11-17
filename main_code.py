@@ -26,8 +26,9 @@ list_of_videoLinks = params['list_of_videoLinks'] # list of videos id
 if __name__ == '__main__':
   
     dict_multi_videoComments = fu.comments_to_json(list_of_videoLinks,MAX_NBR_COM,api_key)
-    dict_of_dfs = {}
     key_list =  list(dict_multi_videoComments.keys())    
+    dict_of_dfs = dict.fromkeys(key_list, None) # initialize a dictionnary with its keys
+    
     tables = fu.dict_to_df(key_list,dict_multi_videoComments,dict_of_dfs)
     
-    
+    #test = tables['1RrHbtJA6V0']

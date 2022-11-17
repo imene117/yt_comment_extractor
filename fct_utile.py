@@ -178,7 +178,7 @@ def dict_to_df(key_list,dict_multi_videoComments,dict_of_dfs):
         result = pd.concat([result_lev_1,result_lev_2],  ignore_index=True)
         dict_of_dfs[vi] = result
         
-        return dict_of_dfs
+    return dict_of_dfs
     
     
     
