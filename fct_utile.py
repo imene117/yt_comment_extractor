@@ -10,6 +10,8 @@ import pandas as pd
 import yaml
 from googleapiclient.discovery import build
 import json
+import os
+import string
 
      
 def build_res_req(api_key,video_id,MAX_NBR_COM):
@@ -105,8 +107,6 @@ def dict_comment_item(response,MAX_NBR_COM,video_id):
                 parent_id.append(parent_com)
                 publishedAt.append(date_published)
 
-
-
                 
         # Filling dict_of_comment
         #comment
@@ -124,7 +124,6 @@ def dict_comment_item(response,MAX_NBR_COM,video_id):
         dict_of_comment['reply']['parent_id'].append(parent_id)
         dict_of_comment['reply']['date_and_time'].append(publishedAt)
 
-    taille = len(dict_of_comment['author_comm'])
     return dict_of_comment
 
 
@@ -167,7 +166,6 @@ def dict_to_df(key_list,dict_multi_videoComments,dict_of_dfs):
                 #concatenat the columns
                 df_temporary = pd.concat([pd.Series(vid_id),pd.Series(author_of_comment),pd.Series(comment),pd.Series(comment_id),pd.Series(parent_id)], axis =1)
                 print('df_temporary', df_temporary)
-                print('df_temporary col =',df_temporary.columns )
                 df_temporary.columns = ['video_id', 'author_of_comment', 'comment', 'comment_id', 'parent_id']
     
                 #concat with result_lev_2 df
@@ -179,6 +177,16 @@ def dict_to_df(key_list,dict_multi_videoComments,dict_of_dfs):
         dict_of_dfs[vi] = result
         
     return dict_of_dfs
+
+def df_to_csv(key_list,tables):
+    result_path = 'result_csv'
+    for vi in key_list:
+        strVar = vi
+        name = "tab_%s.csv"%strVar
+        fileName = os.path.join(result_path,name)
+        test1 = tables[vi]
+        test1.to_csv(fileName, index=False)
+
     
     
     
